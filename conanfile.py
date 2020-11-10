@@ -5,7 +5,7 @@ class CctoolsConan(ConanFile):
     name = 'cctools'
 
     cctools_version = '949.0.1'
-    package_version = '0'
+    package_version = '1'
     version = '%s-%s' % (cctools_version, package_version)
 
     build_requires = (
@@ -52,11 +52,13 @@ class CctoolsConan(ConanFile):
                 with tools.chdir('libstuff'):
                     self.run('make %s' % make_args)
                 with tools.chdir('misc'):
-                    self.run('make codesign_allocate.NEW lipo.NEW %s' % make_args)
+                    self.run('make codesign_allocate.NEW lipo.NEW install_name_tool.NEW %s' % make_args)
             self.run('strip misc/codesign_allocate.NEW')
             self.run('strip misc/lipo.NEW')
+            self.run('strip misc/install_name_tool.NEW')
             shutil.move('misc/codesign_allocate.NEW', '../%s/codesign_allocate' % self.install_x86_dir)
             shutil.move('misc/lipo.NEW', '../%s/lipo' % self.install_x86_dir)
+            shutil.move('misc/install_name_tool.NEW', '../%s/install_name_tool' % self.install_x86_dir)
 
 
             self.output.info("=== Build cctools for arm64 ===")
@@ -68,11 +70,13 @@ class CctoolsConan(ConanFile):
                     self.run('make %s' % make_args)
                 with tools.chdir('misc'):
                     self.run('make clean')
-                    self.run('make codesign_allocate.NEW lipo.NEW %s' % make_args)
+                    self.run('make codesign_allocate.NEW lipo.NEW install_name_tool.NEW %s' % make_args)
             self.run('strip misc/codesign_allocate.NEW')
             self.run('strip misc/lipo.NEW')
+            self.run('strip misc/install_name_tool.NEW')
             shutil.move('misc/codesign_allocate.NEW', '../%s/codesign_allocate' % self.install_arm_dir)
             shutil.move('misc/lipo.NEW', '../%s/lipo' % self.install_arm_dir)
+            shutil.move('misc/install_name_tool.NEW', '../%s/install_name_tool' % self.install_arm_dir)
 
 
         self.output.info("=== Merge x86_64 + arm64 ===")
@@ -80,9 +84,11 @@ class CctoolsConan(ConanFile):
         with tools.chdir(self.install_universal_dir):
             self.run('lipo -create ../%s/codesign_allocate ../%s/codesign_allocate -output codesign_allocate' % (self.install_x86_dir, self.install_arm_dir))
             self.run('lipo -create ../%s/lipo ../%s/lipo -output lipo' % (self.install_x86_dir, self.install_arm_dir))
+            self.run('lipo -create ../%s/install_name_tool ../%s/install_name_tool -output install_name_tool' % (self.install_x86_dir, self.install_arm_dir))
 
 
     def package(self):
         self.copy('codesign_allocate', src=self.install_universal_dir, dst='bin')
         self.copy('lipo', src=self.install_universal_dir, dst='bin')
+        self.copy('install_name_tool', src=self.install_universal_dir, dst='bin')
         self.copy('%s.txt' % self.name, src=self.source_dir, dst='license')

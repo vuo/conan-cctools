@@ -2,7 +2,6 @@ from conans import ConanFile
 
 class CctoolsTestConan(ConanFile):
     requires = 'llvm/5.0.2-1@vuo/stable'
-    generators = 'qbs'
 
     def imports(self):
         self.copy('*', dst='bin', src='bin')
@@ -16,3 +15,5 @@ class CctoolsTestConan(ConanFile):
         self.run('file codesign_allocate3')
 
         self.run('bin/lipo -info bin/lipo')
+
+        self.run('bin/install_name_tool -add_rpath test codesign_allocate3')
