@@ -5,7 +5,7 @@ class CctoolsConan(ConanFile):
     name = 'cctools'
 
     cctools_version = '949.0.1'
-    package_version = '1'
+    package_version = '2'
     version = '%s-%s' % (cctools_version, package_version)
 
     build_requires = (
@@ -88,6 +88,10 @@ class CctoolsConan(ConanFile):
 
 
     def package(self):
+        self.run('codesign --sign - %s/codesign_allocate' % self.install_universal_dir)
+        self.run('codesign --sign - %s/lipo' % self.install_universal_dir)
+        self.run('codesign --sign - %s/install_name_tool' % self.install_universal_dir)
+
         self.copy('codesign_allocate', src=self.install_universal_dir, dst='bin')
         self.copy('lipo', src=self.install_universal_dir, dst='bin')
         self.copy('install_name_tool', src=self.install_universal_dir, dst='bin')
